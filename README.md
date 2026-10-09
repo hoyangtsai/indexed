@@ -80,7 +80,7 @@ zsh native/apple-embedding/build_native_service.sh
 scripts/run-host-embedding-helper.sh /path/to/model-package
 ```
 
-脚本会打印需要填写的值。在容器的 Dashboard“模型与数据库”中新建档案，向量后端选择外部服务（remote），填入脚本输出的服务地址、API key、模型 `wemm-embedding-2b-apple-2048`、维度 2048，输入风格 `wemm`。token 保存在 `$INDEXED_HOME`（默认 `~/.config/indexed`）下的 `host-helper.token`，权限为 600。容器内的 `config.json` 会保存该 API key，请勿提交或分享 `.data/`。
+脚本会打印需要填写的值。在容器的 Dashboard“模型与数据库”中新建档案，向量后端选择外部服务（remote），填入脚本输出的服务地址、API key、模型 `wemm-embedding-2b-apple-2048`、维度 2048，输入风格 `wemm`，以及脚本输出的向量空间 ID（形如 `wemm-2b-apple-q8-g64-2048-<模型包指纹>`，在 Dashboard 的“向量空间”字段填写）。空间 ID 必须与 helper 返回的一致：图片可以不填，但视频切片会因“向量空间不匹配”而全部失败。token 保存在 `$INDEXED_HOME`（默认 `~/.config/indexed`）下的 `host-helper.token`，权限为 600。容器内的 `config.json` 会保存该 API key，请勿提交或分享 `.data/`。
 
 此模式只传输素材内容（Base64）到宿主机 helper，不需要路径映射。切换后向量空间不同，需要重新扫描素材。
 

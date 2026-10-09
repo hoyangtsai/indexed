@@ -16,6 +16,14 @@ tokenfile="$home/host-helper.token"
 [[ -x "$binary" ]] || { print -u2 "Missing helper binary: $binary (run native/apple-embedding/build_native_service.sh)"; exit 1; }
 [[ -d "$package" ]] || { print -u2 "Model package not found: $package"; exit 1; }
 
+# Video indexing requires the profile's space ID to equal the helper's own embedding
+# space, which comes from the package manifest. Fill in the dimension placeholder.
+space="$(node -e '
+const m = JSON.parse(require("fs").readFileSync(process.argv[1] + "/manifest.json", "utf8"));
+process.stdout.write(String(m.embedding_space_template || "").replace("{dimension}", "2048"));
+' "$package")"
+[[ -n "$space" ]] || { print -u2 "No embedding_space_template in $package/manifest.json"; exit 1; }
+
 # Reuse one token so the profile saved in the dashboard stays valid across runs.
 if [[ ! -s "$tokenfile" ]]; then
   mkdir -p "$home"
@@ -29,6 +37,7 @@ Dashboard profile (embedding provider: remote):
   Model       : wemm-embedding-2b-apple-2048
   Dimension   : 2048
   Input style : wemm
+  Space ID    : $space
 INFO
 
 export INDEXED_APPLE_EMBEDDING_AUTH_TOKEN="$(<"$tokenfile")"
