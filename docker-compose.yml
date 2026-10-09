@@ -1,0 +1,30 @@
+services:
+  indexed:
+    build: .
+    depends_on:
+      - openclip
+    ports:
+      # Publish on host loopback only; the dashboard has no login.
+      - "127.0.0.1:18767:18768"
+    volumes:
+      - ./.data/indexed:/data
+      # Media folders are read-only; register the container path in the dashboard.
+      - ${INDEXED_MEDIA_DIR:-./.data/media}:/media/test:ro
+
+  # Hosted embedding helper. In the dashboard set the embedding service to
+  # http://openclip:5007, model openclip-vit-l-14, dimension 768.
+  # Not published on the host; only Indexed can reach it.
+  openclip:
+    build: ./openclip-embedding-service
+    environment:
+      MODEL_NAME: "ViT-L-14"
+      PRETRAINED: "openai"
+      SERVED_MODEL_ID: "openclip-vit-l-14"
+      HF_HOME: /cache/huggingface
+      TORCH_HOME: /cache/torch
+    volumes:
+      - openclip-cache:/cache
+    restart: unless-stopped
+
+volumes:
+  openclip-cache:
