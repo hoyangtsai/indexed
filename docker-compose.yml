@@ -3,6 +3,7 @@ services:
     build: .
     depends_on:
       - openclip
+    restart: unless-stopped
     ports:
       # Publish on host loopback only; the dashboard has no login.
       - "127.0.0.1:18767:18768"
