@@ -1,0 +1,24 @@
+services:
+  openclip-embedding:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openclip-embedding
+    ports:
+      - "5007:5007"
+    environment:
+      MODEL_NAME: "ViT-L-14"
+      PRETRAINED: "openai"
+      SERVED_MODEL_ID: "openclip-vit-l-14"
+      HTTP_TIMEOUT_SECONDS: "20"
+      INDEXED_LOCAL_ASSETS_DIR: "${INDEXED_LOCAL_ASSETS_DIR:-./mounted-assets}"
+      LOCAL_IMAGE_ROOTS: "/mnt/indexed-assets"
+      FUSION_MODE: "adaptive"
+      FIXED_IMAGE_WEIGHT: "0.8"
+      FIXED_TEXT_WEIGHT: "0.2"
+      ADAPTIVE_TEXT_WEIGHT_MIN: "0.15"
+      ADAPTIVE_TEXT_WEIGHT_MAX: "0.45"
+      ADAPTIVE_TEXT_WEIGHT_SLOPE: "0.015"
+    volumes:
+      - ${INDEXED_LOCAL_ASSETS_DIR:-./mounted-assets}:/mnt/indexed-assets:ro
+    restart: unless-stopped

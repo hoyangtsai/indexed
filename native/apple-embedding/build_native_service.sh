@@ -6,7 +6,9 @@ SWIFT_DIR="$SCRIPT_DIR/swift"
 OUTPUT_DIR=${1:-"$SCRIPT_DIR/dist/apple-silicon"}
 
 cd "$SWIFT_DIR"
-swift build -c release --force-resolved-versions
+# Swift Build (default in newer SwiftPM) compiles mlx-swift's Metal kernels;
+# this build uses the hash-pinned prebuilt mlx.metallib from prepare-metallib.mjs.
+swift build -c release --force-resolved-versions --build-system native
 
 METALLIB="$SWIFT_DIR/.build/release/mlx.metallib"
 node "$SCRIPT_DIR/prepare-metallib.mjs" "$SWIFT_DIR/.build/release"

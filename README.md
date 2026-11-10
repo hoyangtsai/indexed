@@ -71,6 +71,19 @@ node scripts/prepare-apple-model-package.mjs --verify /path/to/model-package
 
 A/B/C/D 共用一个模型包，均使用 Swift helper。Dashboard 的 A/C/D 入口需要开启实验选项；C/D 使用私有 Apple API，不能视为公开 API 支持承诺。实际设备路由与回退以诊断信息为准。
 
+## 在 Docker 中使用宿主机的 Apple 模型
+
+Apple 原生 helper 依赖 Core ML、MLX 与 ANE，无法在 Linux 容器内运行。Docker 中的 Indexed 可以连接运行在 macOS 宿主机上的 helper；helper 仍只监听宿主机 127.0.0.1，容器通过 `host.docker.internal` 访问，并使用 Bearer token 认证。已在 OrbStack 上验证。
+
+```bash
+zsh native/apple-embedding/build_native_service.sh
+scripts/run-host-embedding-helper.sh /path/to/model-package
+```
+
+脚本会打印需要填写的值。在容器的 Dashboard“模型与数据库”中新建档案，向量后端选择外部服务（remote），填入脚本输出的服务地址、API key、模型 `wemm-embedding-2b-apple-2048`、维度 2048，输入风格 `wemm`，以及脚本输出的向量空间 ID（形如 `wemm-2b-apple-q8-g64-2048-<模型包指纹>`，在 Dashboard 的“向量空间”字段填写）。空间 ID 必须与 helper 返回的一致：图片可以不填，但视频切片会因“向量空间不匹配”而全部失败。token 保存在 `$INDEXED_HOME`（默认 `~/.config/indexed`）下的 `host-helper.token`，权限为 600。容器内的 `config.json` 会保存该 API key，请勿提交或分享 `.data/`。
+
+此模式只传输素材内容（Base64）到宿主机 helper，不需要路径映射。切换后向量空间不同，需要重新扫描素材。
+
 ## Chrome 扩展与 Agent
 
 从 [Releases](https://github.com/xiaotianfotos/indexed/releases) 下载 `indexed-extension-版本号.zip`，解压到一个固定目录。插件安装无需 Node.js 或自行编译：
